@@ -59,21 +59,37 @@ async def chatbot(request: Request):
     # API URL to send the payload
     url = 'https://chatbot-ji1z.onrender.com/chatbot-ji1z'
 
-    # Send the POST request
-    response = requests.post(url, data=json_payload, headers=headers)
+    try:
+        # Send the POST request
+        response = requests.post(url, data=json_payload, headers=headers)
 
-    # Create a response structure
-    if response.status_code == 200:
-        # Parse the response
-        api_response = response.json()
-        response_data = {
-            'status': 'success',
-            'message': api_response['choices'][0]['message']['content']
-        }
-    else:
+        # Debugging: Print response content for analysis
+        print("Response content:", response.text)
+
+        # Create a response structure
+        if response.status_code == 200:
+            # Attempt to parse the response
+            try:
+                api_response = response.json()
+                response_data = {
+                    'status': 'success',
+                    'message': api_response['choices'][0]['message']['content']
+                }
+            except json.JSONDecodeError as e:
+                response_data = {
+                    'status': 'error',
+                    'message': f"Failed to decode JSON response: {e}"
+                }
+        else:
+            response_data = {
+                'status': 'error',
+                'message': f"Failed. Status code: {response.status_code}. Response: {response.text}"
+            }
+
+    except Exception as e:
         response_data = {
             'status': 'error',
-            'message': f"Failed. Status code: {response.status_code}"
+            'message': f"An error occurred: {str(e)}"
         }
 
     # Return the JSON response
