@@ -35,7 +35,6 @@ async def chatbot(request: Request):
         'sec-fetch-site': 'cross-site',
         'sec-fetch-mode': 'cors',
         'sec-fetch-dest': 'empty',
-        'accept-encoding': 'gzip, deflate, br, zstd',
         'accept-language': 'en-US,en;q=0.9,bn;q=0.8,ru;q=0.7,zh-CN;q=0.6,zh;q=0.5,hi;q=0.4',
         'priority': 'u=1, i'
     }
