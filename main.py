@@ -4,30 +4,14 @@ import json
 
 app = FastAPI()
 
-# Function to fetch content from the given URL
-def fetch_role_content(url):
-    response = requests.get(url)
-    if response.status_code == 200:
-        return response.text.strip()  # Strip to remove any leading/trailing whitespace
-    else:
-        return "Default system message."  # Handle fetch failure
-
-# API endpoint for handling requests
 @app.get("/chatbot")
 async def chatbot(request: Request):
     # Get the 'question' parameter from URL
     question = request.query_params.get('question', 'Hi')  # Default to 'Hi' if not provided
 
-    # Fetch the role content from the provided URL
-    role_content = fetch_role_content('https://api.teleservices.io/bb.txt')
-
-    # Prepare the payload
+    # Prepare the payload with the user message
     payload = {
         'messages': [
-            {
-                'role': 'system',
-                'content': role_content
-            },
             {
                 'role': 'user',
                 'content': question
@@ -38,7 +22,7 @@ async def chatbot(request: Request):
     # Convert the payload to JSON format
     json_payload = json.dumps(payload)
 
-    # Define the headers
+    # Define the headers to match the provided request
     headers = {
         'sec-ch-ua': '"Not)A;Brand";v="99", "Google Chrome";v="127", "Chromium";v="127"',
         'accept': 'application/json',
@@ -63,34 +47,11 @@ async def chatbot(request: Request):
         # Send the POST request
         response = requests.post(url, data=json_payload, headers=headers)
 
-        # Debugging: Print response content for analysis
-        print("Response content:", response.text)
+        # Print the raw response
+        print("Raw Response:", response.text)
 
-        # Create a response structure
-        if response.status_code == 200:
-            # Attempt to parse the response
-            try:
-                api_response = response.json()
-                response_data = {
-                    'status': 'success',
-                    'message': api_response['choices'][0]['message']['content']
-                }
-            except json.JSONDecodeError as e:
-                response_data = {
-                    'status': 'error',
-                    'message': f"Failed to decode JSON response: {e}"
-                }
-        else:
-            response_data = {
-                'status': 'error',
-                'message': f"Failed. Status code: {response.status_code}. Response: {response.text}"
-            }
+        # Return the raw response
+        return response.text
 
     except Exception as e:
-        response_data = {
-            'status': 'error',
-            'message': f"An error occurred: {str(e)}"
-        }
-
-    # Return the JSON response
-    return response_data
+        return {"status": "error", "message": str(e)}
